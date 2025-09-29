@@ -1,0 +1,58 @@
+
+Layout {
+Name = "periodic_line"
+UnitOfLength = %(uol1)e
+
+
+<?
+for i, shape in enumerate(keys['shape']):
+    keys['id'] = shape.domain_id
+    keys['point'] = shape.points
+    keys['prior'] = shape.priority
+    keys['layer'] = shape.name
+    if shape.name == "ComputationalDomain":
+        ?>
+            Polygon {
+                Name = "%(layer)s"
+                DomainId = %(id)e
+                Priority = %(prior)e
+                Points = %(point)e
+                SideLengthConstraint = %(slc)e
+            
+            BoundarySegment {
+            Number = 1
+            BoundaryClass = Transparent #Boundary
+            }
+            BoundarySegment {
+            Number = 2
+            BoundaryClass = Periodic
+            }
+            BoundarySegment {
+            Number = 3
+            BoundaryClass = Transparent #Boundary
+            }
+            BoundarySegment {
+            Number = 4
+            BoundaryClass = Periodic
+            }
+            }
+    <?
+    else:
+        ?>
+            Polygon {
+                    Name = "%(layer)s"
+                    DomainId = %(id)e
+                    Priority = %(prior)e
+                    Points = %(point)e
+                    SideLengthConstraint = %(slc)e
+                }
+                <?
+?>
+}
+
+
+
+
+
+
+

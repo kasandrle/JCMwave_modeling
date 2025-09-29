@@ -1,0 +1,72 @@
+
+Layout {
+Name = "periodic_line"
+UnitOfLength = 1e-09
+
+
+
+            Polygon {
+                Name = "ComputationalDomain"
+                DomainId = 1
+                Priority = 0
+                Points = [-1 -30 1 -30 1 86.2 -1 86.2]
+                SideLengthConstraint = 0.7
+            
+            BoundarySegment {
+            Number = 1
+            BoundaryClass = Transparent #Boundary
+            }
+            BoundarySegment {
+            Number = 2
+            BoundaryClass = Periodic
+            }
+            BoundarySegment {
+            Number = 3
+            BoundaryClass = Transparent #Boundary
+            }
+            BoundarySegment {
+            Number = 4
+            BoundaryClass = Periodic
+            }
+            }
+    
+            Polygon {
+                    Name = "substrate"
+                    DomainId = 2
+                    Priority = 1
+                    Points = [-1 -30 1 -30 1 0 -1 0]
+                    SideLengthConstraint = 0.7
+                }
+                
+            Polygon {
+                    Name = "substrate_oxide"
+                    DomainId = 3
+                    Priority = 2
+                    Points = [-1 0 1 0 1 1.2 -1 1.2]
+                    SideLengthConstraint = 0.7
+                }
+                
+            Polygon {
+                    Name = "UL"
+                    DomainId = 4
+                    Priority = 2
+                    Points = [-1 1.2 1 1.2 1 36.2 -1 36.2]
+                    SideLengthConstraint = 0.7
+                }
+                
+            Polygon {
+                    Name = "resist"
+                    DomainId = 5
+                    Priority = 2
+                    Points = [-1 36.2 1 36.2 1 56.2 -1 56.2]
+                    SideLengthConstraint = 0.7
+                }
+                
+}
+
+
+
+
+
+
+

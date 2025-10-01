@@ -5,6 +5,35 @@ from .utils import corner_round
 import numpy as np
 
 class ShapeGenerator:
+    """
+    🔷 ShapeGenerator: A modular geometry engine for parametric shape creation.
+
+    Supports multiple shape types including:
+    - Rectangle
+    - Trapezoid
+    - Stacked trapezoids
+    - B-splines
+
+    Features:
+    • Flexible parameter dictionary per shape
+    • Optional offset for x and y positioning
+    • Corner rounding via arc interpolation
+    • Centering and flattening utilities
+    • Matplotlib-based plotting
+    • Ceremonial narration via `.describe()`
+
+    Shape-specific parameters:
+    - Rectangle: height, width
+    - Trapezoid: height, width, side_angle_deg
+    - Stacked trapezoids: height (list), width (list of len+1)
+    - B-splines: control_points, num_points
+
+    Example:
+        sg = ShapeGenerator('rectangle', {'height': 10, 'width': 20})
+        sg.plot()
+        print(sg.describe())
+    """
+
     def __init__(self, shape_type, params, offset_x=0, offset_y=0):
         self.shape_type = shape_type.lower()
         self.params = params
@@ -135,10 +164,10 @@ class ShapeGenerator:
             raise ValueError("Rectangle requires 'height' and 'width'")
 
         return [            
+            (self.offset_x, self.offset_y),
             (self.offset_x + w, self.offset_y),
             (self.offset_x + w, self.offset_y + h),
-            (self.offset_x, self.offset_y + h),
-            (self.offset_x, self.offset_y),
+            (self.offset_x, self.offset_y + h),     
         ]
 
 

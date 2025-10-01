@@ -12,41 +12,38 @@ for i, shape in enumerate(keys['shape']):
     keys['layer'] = shape.name
     if shape.name == "ComputationalDomain":
         ?>
-            Polygon {
+        Polygon {
+            Name = "%(layer)s"
+            DomainId = %(id)e
+            Priority = %(prior)e
+            Points = %(point)e
+            SideLengthConstraint = %(slc)e
+        <?
+        for ii,boundary in enumerate(shape.boundary):
+            keys['BoundaryClass'] = boundary
+            keys['Number'] = ii+1
+            ?>
+            BoundarySegment {
+            Number = %(Number)e
+            BoundaryClass = %(BoundaryClass)s
+            }
+        <?
+        ?>
+        }
+        <?
+        ?>
+
+    <?
+    else:
+        ?>
+        Polygon {
                 Name = "%(layer)s"
                 DomainId = %(id)e
                 Priority = %(prior)e
                 Points = %(point)e
                 SideLengthConstraint = %(slc)e
-            
-            BoundarySegment {
-            Number = 1
-            BoundaryClass = Transparent #Boundary
             }
-            BoundarySegment {
-            Number = 2
-            BoundaryClass = Periodic
-            }
-            BoundarySegment {
-            Number = 3
-            BoundaryClass = Transparent #Boundary
-            }
-            BoundarySegment {
-            Number = 4
-            BoundaryClass = Periodic
-            }
-            }
-    <?
-    else:
-        ?>
-            Polygon {
-                    Name = "%(layer)s"
-                    DomainId = %(id)e
-                    Priority = %(prior)e
-                    Points = %(point)e
-                    SideLengthConstraint = %(slc)e
-                }
-                <?
+        <?
 ?>
 }
 

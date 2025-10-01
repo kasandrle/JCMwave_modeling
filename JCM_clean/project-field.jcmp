@@ -1,0 +1,51 @@
+Project = {
+  InfoLevel = 10
+  StorageFormat = Binary
+  Electromagnetics {
+      TimeHarmonic {
+               Scattering {
+        FieldComponents = Electric
+        FiniteElementDegree = 4
+
+       
+       }
+
+                  }
+  }
+}
+
+
+
+
+
+PostProcess {
+ ExportFields {
+   FieldBagPath = "project-field_results/fieldbag.jcm"
+    OutputQuantity =  "ElectricFieldStrength" #"ElectricFieldEnergyDensity"# "ElectricFieldStrength"
+    OutputFileName = "project-field_results/fieldbag_near_field_xy.jcm"
+  #DomainIds = [2,3,4,5] #Standard nur 3
+  Cartesian {
+#    NGridPointsX = 100
+#    NGridPointsY = %?(cdyheight)e
+    Spacing = 0.1e-9
+    }#
+  }
+}
+
+#PostProcess {
+#  FourierTransform {
+#    FieldBagPath = "project-field_results/fieldbag.jcm"
+#    OutputFileName = "project-field_results/ft.jcm"
+#    NormalDirection = Y
+#    #Rotation = X:Z:Y
+#  }
+#}
+
+#PostProcess {
+#  FourierTransform {
+#    FieldBagPath = "project_results/fieldbag.jcm"
+#    OutputFileName = "project_results/fourier_modes_transmitted.jcm"
+#    NormalDirection = Y
+#    Rotation = X:Z:-Y
+#  }
+#}

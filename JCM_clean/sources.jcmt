@@ -1,21 +1,28 @@
-SourceBag {
+<?
+for i, source in enumerate(keys['source']):
+  keys['lam'] = source.lam
+  keys['pol'] = source.polarization
+  keys['angle_of_incidence'] = source.angle_of_incidence
+  keys['phi'] = source.phi
+  keys['incidence'] = source.incidence
+  ?>
+  SourceBag {
 
   Source {
-    ElectricFieldStrength {
-      PlaneWave {
-        Lambda0 = %(lamb)e
-        SP = %(pol)e #[0, 1]
-        #Amplitude = [0 1 0]
-        ThetaPhi = [%(angle_of_incidence)e, %(phi)e]
-        #Sigma = [0 0]
-        3DTo2D = yes
-        #Direction = -Z
-        Incidence = FromAbove
-        #PowerFluxScaling=UnitNormal
+
+      ElectricFieldStrength {
+        PlaneWave {
+          Lambda0 = %(lam)e
+          SP = %(pol)e 
+          ThetaPhi = [%(angle_of_incidence)e, %(phi)e]
+          3DTo2D = yes
+          Incidence = %(incidence)s
+        }
       }
+                      <?
+  ?>
     }
   }
-}
 
 
 

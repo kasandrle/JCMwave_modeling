@@ -41,11 +41,4 @@ PostProcess {
   }
 }
 
-#PostProcess {
-#  FourierTransform {
-#    FieldBagPath = "project_results/fieldbag.jcm"
-#    OutputFileName = "project_results/fourier_modes_transmitted.jcm"
-#    NormalDirection = Y
-#    Rotation = X:Z:-Y
-#  }
-#}
+

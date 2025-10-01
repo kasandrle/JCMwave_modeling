@@ -1,6 +1,5 @@
 Project = {
-  InfoLevel = 10
-  StorageFormat = Binary
+  InfoLevel = 1
   Electromagnetics {
       TimeHarmonic {
                Scattering {

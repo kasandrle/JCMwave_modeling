@@ -1,5 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
+import pandas as pd
 from typing import Any, Dict, List, Optional
 from .utils import eVnm_converter
 
@@ -430,16 +431,19 @@ class FourierCoefficients:
                     (amp_z.conj() * amp_z).real
 
         # Build dataframe
+        n_orders = len(N1)
+
         df = pd.DataFrame({
             "order": N1,
             "Kx": Kx,
             "Ky": Ky,
             "Kz": Kz,
-            "Kx_in": Kx_in,
-            "Ky_in": Ky_in,
-            "Kz_in": Kz_in,
+            "Kx_in": np.full(n_orders, Kx_in),
+            "Ky_in": np.full(n_orders, Ky_in),
+            "Kz_in": np.full(n_orders, Kz_in),
             "Intensity_calc": intensity
         })
+
 
         # Derived quantities
         df["k_norm"] = df.apply(lambda row: np.linalg.norm([row["Kx_in"], row["Ky_in"], row["Kz_in"]]), axis=1)

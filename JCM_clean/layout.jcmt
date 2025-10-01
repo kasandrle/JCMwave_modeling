@@ -10,6 +10,7 @@ for i, shape in enumerate(keys['shape']):
     keys['point'] = shape.points
     keys['prior'] = shape.priority
     keys['layer'] = shape.name
+    keys['slc'] = shape.side_length_constraint
     if shape.name == "ComputationalDomain":
         ?>
         Polygon {

@@ -10,27 +10,9 @@
   
 
     Material {
-      Name = "substrate"
+      Name = "shape"
       Id = 2
-      RelPermittivity = (0.997997702690019, 0.00364942085772711)
-      RelPermeability = 1
-}
-
-  
-
-    Material {
-      Name = "substrate_oxide"
-      Id = 3
-      RelPermittivity = (0.958532064804654, 0.020070685902354)
-      RelPermeability = 1
-}
-
-  
-
-    Material {
-      Name = "resist"
-      Id = 5
-      RelPermittivity = (0.9545114439, 0.00818726)
+      RelPermittivity = (0.999314732496195, 0.00036489854885449)
       RelPermeability = 1
 }
 

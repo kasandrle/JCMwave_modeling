@@ -5,9 +5,9 @@
 
       ElectricFieldStrength {
         PlaneWave {
-          Lambda0 = 2e-07
+          Lambda0 = 4.35032275204211e-09
           SP = [1 0] 
-          ThetaPhi = [45, 45]
+          ThetaPhi = [20, 0]
           3DTo2D = yes
           Incidence = FromBelow
         }

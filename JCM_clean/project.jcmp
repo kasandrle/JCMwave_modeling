@@ -1,6 +1,5 @@
 Project = {
-  InfoLevel = 10
-  StorageFormat = Binary
+  InfoLevel = 1
   Electromagnetics {
       TimeHarmonic {
                Scattering {
@@ -36,6 +35,7 @@ Project = {
     FieldBagPath = "project_results/fieldbag.jcm"
     OutputFileName = "project_results/ft.jcm"
     NormalDirection = Y
+    Rotation = X:Z:-Y
   }
 }
 

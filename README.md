@@ -41,3 +41,4 @@ shape = [
 ## Assign shape and source arrays to keys dictionary
 keys['shape'] = shape
 keys['source'] = [s_eV]
+keys['postprocess']=[pp1,pp2]

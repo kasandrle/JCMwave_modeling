@@ -1,5 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
+from typing import Any, Dict, List, Optional
 from .utils import eVnm_converter
 
 class Shape:
@@ -286,3 +287,266 @@ class PostProcess:
         lines.append(f"{pad}  }}")
         lines.append(f"{pad}}}")
         return "\n".join(lines)
+    
+
+class ComputationalCosts:
+    def __init__(self, title: str, header: Dict[str, Any], **kwargs):
+        self.title = title
+        self.header = header
+        self.data = kwargs  # arrays like CpuTime, Unknowns, etc.
+
+    def summary(self) -> str:
+        return (
+            f"📊 {self.title}: "
+            f"CPU={self.header.get('AccumulatedCPUTime', 'N/A'):.2f}s, "
+            f"Total={self.header.get('AccumulatedTotalTime', 'N/A'):.2f}s, "
+            f"Unknowns={self.data.get('Unknowns', ['?'])[0]}"
+        )
+
+class FieldData:
+    def __init__(self, field, grid, X, Y, Z, header):
+        self.field = field
+        self.grid = grid
+        self.X, self.Y, self.Z = X, Y, Z
+        self.header = header
+
+    def shape(self):
+        return self.field[0].shape if self.field else None
+
+    def summary(self) -> str:
+        return (
+            f"🌐 FieldData: Quantity={self.header.get('QuantityType')}, "
+            f"Shape={self.shape()}, "
+            f"Grid points={self.X.shape}"
+        )
+
+    def intensity(self, index=0):
+        """Compute intensity = |E|^2 from complex field."""
+        amplitude = self.field[index]  # shape (Nx, Ny, 3)
+        return (amplitude.conj() * amplitude).sum(2).real
+
+    def plot_field(self, index=0, log=True, cmap="viridis", scale=1e9):
+        """
+        Plot the field intensity on the XY grid.
+
+        Parameters:
+        • index: which field array to use (default 0)
+        • log: whether to plot log(intensity)
+        • cmap: matplotlib colormap
+        • scale: scaling factor for axes (default 1e9 → nm)
+        """
+        intensity = self.intensity(index)
+        Z = np.log(intensity) if log else intensity
+
+        fig, ax = plt.subplots(1, 1, figsize=(8, 5))
+        mesh = ax.pcolormesh(
+            self.X * scale,
+            self.Y * scale,
+            Z,
+            cmap=cmap,
+            shading="auto"
+        )
+        cbar = plt.colorbar(mesh, ax=ax)
+        cbar.set_label("log(Intensity)" if log else "Intensity")
+        ax.set_xlabel(f"X [{ 'nm' if scale==1e9 else 'm'} ]")
+        ax.set_ylabel(f"Y [{ 'nm' if scale==1e9 else 'm'} ]")
+        ax.set_title(f"Field intensity ({self.header.get('QuantityType')})")
+        ax.set_aspect("equal")
+        plt.tight_layout()
+        return fig, ax
+
+
+class FourierCoefficients:
+    def __init__(self, title: str, header: dict, **kwargs):
+        self.title = title
+        self.header = header
+        self.data = kwargs  # contains K, N1, N2, ElectricFieldStrength, etc.
+
+    def summary(self) -> str:
+        return (
+            f"🔊 {self.title}: NormalDirection={self.header.get('NormalDirection')}, "
+            f"K={self.data.get('K').shape if 'K' in self.data else None}"
+        )
+
+    def compute_order_intensities(self, orders_uni=(-1, 0, 1)):
+        orders_uni = np.array(orders_uni)
+
+        orders = self.data["N1"]
+        K = self.data["K"]
+        E = self.data["ElectricFieldStrength"][0]  # shape (nOrders, 3)
+
+        intensity = np.abs(E[:, 2]) ** 2
+
+        zero_order = orders.searchsorted(0)
+        k_in = K[zero_order]
+        k_norm = np.linalg.norm(k_in)
+
+        cos_theta_in = np.abs(k_in[1]) / k_norm
+        cos_theta_out = K[:, 1] / k_norm
+
+        intensity_corrected = intensity * cos_theta_out / cos_theta_in
+
+        raw_out, cor_out, k_vals = [], [], []
+
+        for order in orders_uni:
+            x_o = np.where(orders == order)[0]
+            if x_o.size > 0:
+                idx = x_o[0]
+                raw_out.append(intensity[idx].real)
+                cor_out.append(intensity_corrected[idx].real)
+                k_vals.append(K[idx, 1])  # take y-component as propagation axis
+            else:
+                raw_out.append(0.0)
+                cor_out.append(0.0)
+                k_vals.append(np.nan)
+
+        return {
+            "orders": orders_uni,
+            "raw": np.array(raw_out),
+            "corrected": np.array(cor_out),
+            "K": np.array(k_vals),
+        }
+    
+    def to_dataframe(self):
+        """
+        Build a DataFrame with diffraction order information:
+        Kx, Ky, Kz, input wavevector, raw and corrected intensities.
+        """
+        K = self.data["K"]
+        N1 = self.data["N1"]
+        E = self.data["ElectricFieldStrength"][0]
+
+        # Components
+        Kx, Ky, Kz = K[:, 0], K[:, 1], K[:, 2]
+
+        # Input k-vector
+        k_in = self.header["IncomingPlaneWaveKVector"][0]
+        Kx_in, Ky_in, Kz_in = k_in[0], k_in[1], k_in[2]
+
+        # Intensities from all components
+        amp_x, amp_y, amp_z = E[:, 0], E[:, 1], E[:, 2]
+        intensity = (amp_x.conj() * amp_x).real + \
+                    (amp_y.conj() * amp_y).real + \
+                    (amp_z.conj() * amp_z).real
+
+        # Build dataframe
+        df = pd.DataFrame({
+            "order": N1,
+            "Kx": Kx,
+            "Ky": Ky,
+            "Kz": Kz,
+            "Kx_in": Kx_in,
+            "Ky_in": Ky_in,
+            "Kz_in": Kz_in,
+            "Intensity_calc": intensity
+        })
+
+        # Derived quantities
+        df["k_norm"] = df.apply(lambda row: np.linalg.norm([row["Kx_in"], row["Ky_in"], row["Kz_in"]]), axis=1)
+        df["cos_theta_in"] = df["Kz_in"] / df["k_norm"]
+        df["cos_theta_out"] = df["Kz"] / df["k_norm"]
+        df["cos_phi_out"] = np.sqrt(1 - np.square(np.abs(df["Kx"] - df["Kx_in"]) / df["k_norm"]))
+        df["Intensity_calc_corrected"] = (
+            df["Intensity_calc"] * df["cos_theta_out"] / df["cos_theta_in"] * df["cos_phi_out"]
+        )
+        return df
+
+
+
+    def plot_intensities(self, orders_uni=(-1, 0, 1), use_k=False, corrected=True, **kwargs):
+        """
+        Plot diffraction order intensities.
+
+        Parameters
+        ----------
+        orders_uni : iterable of int
+            Orders to plot.
+        use_k : bool
+            If True, plot K_y vs intensity. If False, plot order vs intensity.
+        corrected : bool
+            If True, plot corrected intensities. If False, raw.
+        kwargs : passed to plt.bar or plt.plot
+        """
+        res = self.compute_order_intensities(orders_uni)
+        y = res["corrected"] if corrected else res["raw"]
+
+        if use_k:
+            x = res["K"]
+            xlabel = "K_y (1/m)"
+        else:
+            x = res["orders"]
+            xlabel = "Diffraction Order"
+
+        fig, ax = plt.subplots(figsize=(6, 4))
+        ax.plot(x, y ,'.-', **kwargs)
+        ax.set_xlabel(xlabel)
+        ax.set_ylabel("Intensity")
+        ax.set_title(f"{self.title} ({'corrected' if corrected else 'raw'})")
+        plt.tight_layout()
+        return fig, ax
+
+
+class SimulationResult:
+    """
+    🌀 SimulationResult: container for JCMwave postprocess outputs.
+    """
+
+    def __init__(self, file: str,
+                 computational_costs: Optional[ComputationalCosts] = None,
+                 field_data: Optional[List[FieldData]] = None,
+                 fourier: Optional[List[FourierCoefficients]] = None):
+        self.file = file
+        self.computational_costs = computational_costs
+        self.field_data = field_data or []   # list of FieldData
+        self.fourier = fourier or []         # list of FourierCoefficients
+
+    def summary(self) -> str:
+        lines = [f"📂 SimulationResult from {self.file}"]
+        if self.computational_costs:
+            lines.append(self.computational_costs.summary())
+        for i, fd in enumerate(self.field_data):
+            lines.append(f"FieldData[{i}]: {fd.summary()}")
+        for i, ft in enumerate(self.fourier):
+            lines.append(f"Fourier[{i}]: {ft.summary()}")
+        return "\n".join(lines)
+
+    @classmethod
+    def from_raw(cls, raw: list):
+        comp = ComputationalCosts(**raw[0]["computational_costs"]) if "computational_costs" in raw[0] else None
+
+        field_blocks = []
+        fourier_blocks = []
+
+        # loop through all blocks after the first
+        for block in raw[1:]:
+            if "field" in block:  # FieldData block
+                field_blocks.append(FieldData(
+                    field=block["field"],
+                    grid=block["grid"],
+                    X=block["X"],
+                    Y=block["Y"],
+                    Z=block["Z"],
+                    header=block["header"]
+                ))
+            elif "title" in block and "ElectricFieldStrength" in block:
+                fourier_blocks.append(FourierCoefficients(
+                    title=block["title"],
+                    header=block["header"],
+                    K=block["K"],
+                    N1=block["N1"],
+                    N2=block["N2"],
+                    ElectricFieldStrength=block["ElectricFieldStrength"]
+                ))
+
+        return cls(
+            file=raw[0].get("file", "unknown"),
+            computational_costs=comp,
+            field_data=field_blocks,
+            fourier=fourier_blocks
+        )
+
+
+    @classmethod
+    def from_list(cls, raws: list):
+        """Build a list of SimulationResult objects from a list of raw results."""
+        return [cls.from_raw(r) for r in raws]

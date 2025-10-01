@@ -1,5 +1,5 @@
 
-from .model import Shape, Source, Cartesian, PostProcess
+from .model import Shape, Source, Cartesian, PostProcess, SimulationResult
 from .utils import eVnm_converter,load_nk_from_file, corner_round
 from .ShapeGenerator import ShapeGenerator
 
@@ -8,6 +8,7 @@ __all__ = ['Shape',
            'Cartesian',
            'PostProcess',
            'ShapeGenerator',
+           'SimulationResult',
            'eVnm_converter',
            'load_nk_from_file',
            'corner_round'

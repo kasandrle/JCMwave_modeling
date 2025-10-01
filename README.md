@@ -33,7 +33,7 @@ shape = [
         priority=2,
         side_length_constraint=slc,
         points=trapzoid_stack,
-        nk=nk_TOK
+        nk=nk_resist
     ),
 ]
 

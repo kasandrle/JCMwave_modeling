@@ -1,28 +1,24 @@
-Project {
-  InfoLevel = 3
+Project = {
+  InfoLevel = 10
   StorageFormat = Binary
   Electromagnetics {
-    TimeHarmonic {
-      Scattering {
-        Accuracy {
-          Precision = 0.001
-        }
-      }
-    }
+      TimeHarmonic {
+               Scattering {
+        FieldComponents = Electric
+        FiniteElementDegree = %(fem_deg)i
+
+       
+       }
+
+                  }
   }
 }
 
+<?
+for postprocess in keys['postprocess']:
+    keys['postprocess'] = postprocess.to_jcm()
+    ?>
 
-
-PostProcess {
-  FourierTransform {
-    FieldBagPath = "project_results/fieldbag.jcm"
-    OutputFileName = "project_results/ft.jcm"
-    NormalDirection = Y
-    #NumericalAperture = 10
-  }
-}
-
-
+    %(postprocess)s
 
 

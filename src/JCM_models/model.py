@@ -140,3 +140,149 @@ class Source:
         lines.append(f"• Incidence direction: {self.incidence}")
         lines.append(f"• Type: {self.type}")
         return "\n".join(lines)
+    
+
+class Cartesian:
+    """
+    📐 Cartesian grid definition for field export.
+
+    You must specify *either*:
+    • NGridPointsX / NGridPointsY (discrete grid definition), OR
+    • Spacing (uniform spacing in meters)
+
+    Not both at the same time.
+    """
+
+    def __init__(self, spacing=None, n_grid_points_x=None, n_grid_points_y=None):
+        if spacing is not None and (n_grid_points_x or n_grid_points_y):
+            raise ValueError("Specify either spacing OR NGridPoints, not both.")
+
+        if spacing is None and (n_grid_points_x is None or n_grid_points_y is None):
+            raise ValueError("If spacing is not given, both NGridPointsX and NGridPointsY must be provided.")
+
+        self.spacing = spacing
+        self.n_grid_points_x = n_grid_points_x
+        self.n_grid_points_y = n_grid_points_y
+
+    def describe(self):
+        if self.spacing is not None:
+            return f"📐 Cartesian grid with spacing = {self.spacing} m"
+        else:
+            return f"📐 Cartesian grid with NGridPointsX={self.n_grid_points_x}, NGridPointsY={self.n_grid_points_y}"
+
+    def to_dict(self):
+        if self.spacing is not None:
+            return {"Cartesian": {"Spacing": self.spacing}}
+        else:
+            return {
+                "Cartesian": {
+                    "NGridPointsX": self.n_grid_points_x,
+                    "NGridPointsY": self.n_grid_points_y,
+                }
+            }
+        
+    def to_jcm(self, indent=2):
+        pad = " " * indent
+        lines = [f"{pad}Cartesian {{"]
+
+        if self.spacing is not None:
+            lines.append(f"{pad}  Spacing = {self.spacing}")
+        else:
+            lines.append(f"{pad}  NGridPointsX = {self.n_grid_points_x}")
+            lines.append(f"{pad}  NGridPointsY = {self.n_grid_points_y}")
+
+        lines.append(f"{pad}}}")
+        return "\n".join(lines)
+
+
+class PostProcess:
+    """
+    🌀 PostProcess: Ritual container for simulation field analysis.
+
+    Two distinct modes are supported:
+
+    • ExportFields:
+        - field_bag_path (str)
+        - output_file_name (str)
+        - output_quantity (str)
+        - domain_ids (list[int], optional)
+        - cartesian (dict, optional) e.g. {"Spacing": 0.1e-9}
+
+    • FourierTransform:
+        - field_bag_path (str)
+        - output_file_name (str)
+        - normal_direction (str: 'X','Y','Z')
+        - rotation (str, optional)
+
+    Methods:
+    • describe(): narrates the chosen post-process in ceremonial format
+    """
+
+    def __init__(self, mode,field_bag_path,output_file_name, **kwargs):
+        allowed_modes = {"ExportFields", "FourierTransform"}
+        if mode not in allowed_modes:
+            raise ValueError(f"mode must be one of {allowed_modes}, got '{mode}'")
+
+        self.mode = mode
+        self.field_bag_path = field_bag_path
+        self.output_file_name = output_file_name
+
+        if mode == "ExportFields":
+            required = ["output_quantity"]
+            for r in required:
+                if r not in kwargs:
+                    raise ValueError(f"Missing required parameter '{r}' for ExportFields")
+
+            self.output_quantity = kwargs["output_quantity"]
+            self.domain_ids = kwargs.get("domain_ids")
+            self.cartesian = kwargs.get("cartesian")
+
+        elif mode == "FourierTransform":
+            self.normal_direction = kwargs.get("normal_direction")
+            self.rotation = kwargs.get("rotation")
+
+    def describe(self):
+        lines = [f"🌀 PostProcess description:"]
+        lines.append(f"• Mode: {self.mode}")
+        lines.append(f"• FieldBagPath: {self.field_bag_path}")
+        lines.append(f"• OutputFileName: {self.output_file_name}")
+
+        if self.mode == "ExportFields":
+            lines.append(f"• OutputQuantity: {self.output_quantity}")
+            if self.domain_ids:
+                lines.append(f"• DomainIds: {self.domain_ids}")
+            if self.cartesian:
+                lines.append(self.cartesian.describe())
+
+        elif self.mode == "FourierTransform":
+            lines.append(f"• NormalDirection: {self.normal_direction}")
+            if self.rotation:
+                lines.append(f"• Rotation: {self.rotation}")
+
+        return "\n".join(lines)
+
+    def to_jcm(self, indent=0):
+        pad = " " * indent
+        lines = [f"{pad}PostProcess {{", f"{pad}  {self.mode} {{"]
+
+        # Shared fields
+        lines.append(f'{pad}    FieldBagPath = "{self.field_bag_path}"')
+        lines.append(f'{pad}    OutputFileName = "{self.output_file_name}"')
+
+        if self.mode == "ExportFields":
+            lines.append(f'{pad}    OutputQuantity = "{self.output_quantity}"')
+            if self.domain_ids:
+                ids = ", ".join(map(str, self.domain_ids))
+                lines.append(f"{pad}    DomainIds = [{ids}]")
+            if self.cartesian:
+                lines.append(self.cartesian.to_jcm(indent + 4))
+
+        elif self.mode == "FourierTransform":
+            if self.normal_direction:
+                lines.append(f"{pad}    NormalDirection = {self.normal_direction}")
+            if self.rotation:
+                lines.append(f"{pad}    Rotation = {self.rotation}")
+
+        lines.append(f"{pad}  }}")
+        lines.append(f"{pad}}}")
+        return "\n".join(lines)

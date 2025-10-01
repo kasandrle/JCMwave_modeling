@@ -1,6 +1,6 @@
 # JCMwave_modeling
 
-# Define shape array with multiple Shape instances
+## Define shape array with multiple Shape instances
 shape = [
     Shape(
         'ComputationalDomain',
@@ -27,14 +27,6 @@ shape = [
         points=substrate_oxide,
         nk=nk_sub_oxid
     ),
-    # Shape(
-    #     'UL',
-    #     domain_id=4,
-    #     priority=2,
-    #     side_length_constraint=slc,
-    #     points=bsplines,
-    #     nk=nk_SOG
-    # ),
     Shape(
         'resist',
         domain_id=5,
@@ -45,9 +37,7 @@ shape = [
     ),
 ]
 
-# Access domain_id of the first shape
-shape[0].domain_id
 
-# Assign shape and source arrays to keys dictionary
+## Assign shape and source arrays to keys dictionary
 keys['shape'] = shape
 keys['source'] = [s_eV]

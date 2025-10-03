@@ -1,0 +1,22 @@
+Project = {
+  InfoLevel = 1
+  Electromagnetics {
+      TimeHarmonic {
+               Scattering {
+        FieldComponents = Electric
+        FiniteElementDegree = %(fem_deg)i
+
+
+       }
+
+                  }
+  }
+}
+
+<?
+for postprocess in keys['postprocess']:
+    keys['postprocess'] = postprocess.to_jcm()
+    ?>
+
+    %(postprocess)s
+    

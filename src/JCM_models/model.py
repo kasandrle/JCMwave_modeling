@@ -102,11 +102,12 @@ class Shape:
         polygon = Polygon(
             points,
             closed=True,
-            facecolor=colors20[self.domain_id],
+            facecolor=colors20[self.domain_id-1],
             edgecolor='black',
             alpha=1,
             label=self.name,
-            zorder=self.priority
+            zorder=self.priority,
+            **kwargs
         )
         if ax is None:
             fig, ax = plt.subplots()

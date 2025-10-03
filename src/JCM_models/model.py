@@ -1,8 +1,33 @@
 import numpy as np
 import matplotlib.pyplot as plt
+from matplotlib.patches import Polygon
 import pandas as pd
 from typing import Any, Dict, List, Optional
 from .utils import eVnm_converter
+
+colors20 = [
+    "tab:blue",
+    "tab:orange",
+    "tab:green",
+    "tab:red",
+    "tab:purple",
+    "tab:brown",
+    "tab:pink",
+    "tab:gray",
+    "tab:olive",
+    "tab:cyan",
+    "blue",
+    "orange",
+    "green",
+    "red",
+    "purple",
+    "brown",
+    "pink",
+    "gray",
+    "olive",
+    "cyan",
+]
+
 
 class Shape:
     """
@@ -70,6 +95,29 @@ class Shape:
             return fig
         else:
             ax.plot(x, y, label=self.name, **kwargs)
+            return ax
+        
+    def plot_colored_geometry(self, ax=None, **kwargs):
+        points = np.asarray(self.points).reshape(-1, 2)
+        polygon = Polygon(
+            points,
+            closed=True,
+            facecolor=colors20[self.domain_id],
+            edgecolor='black',
+            alpha=1,
+            label=self.name,
+            zorder=self.priority
+        )
+        if ax is None:
+            fig, ax = plt.subplots()
+            ax.set_aspect('equal')
+            ax.set_title(f"Shape: {self.name}")
+            ax.legend()
+            
+            ax.add_patch(polygon)
+            return fig
+        else:
+            ax.add_patch(polygon)
             return ax
         
 class Source:

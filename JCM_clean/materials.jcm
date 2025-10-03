@@ -12,7 +12,7 @@
     Material {
       Name = "shape"
       Id = 2
-      RelPermittivity = (0.999314732496195, 0.00036489854885449)
+      RelPermittivity = (1.01006689087219, 0.00487174642288242)
       RelPermeability = 1
 }
 

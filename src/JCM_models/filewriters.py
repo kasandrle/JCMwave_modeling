@@ -37,7 +37,7 @@ for postprocess in keys['postprocess']:
     """
     write_file(folder_name, "project.jcmpt", project_content)
 
-    # --- source.jcmt ---
+    # --- sources.jcmt ---
     source_content = """
 <?
 for i, source in enumerate(keys['source']):
@@ -65,7 +65,7 @@ for i, source in enumerate(keys['source']):
     }
   }
 """
-    write_file(folder_name, "source.jcmt", source_content)
+    write_file(folder_name, "sources.jcmt", source_content)
 
     # --- layout.jcm ---
     layout_content = """

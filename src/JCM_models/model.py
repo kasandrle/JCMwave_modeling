@@ -184,10 +184,10 @@ class Source:
 
     def describe(self):
         lines = [f"🔆 Source description:"]
-        lines.append(f"• Wavelength: {self.lam}")
+        lines.append(f"• Wavelength (m): {self.lam}")
         lines.append(f"• Polarization: {self.polarization} → {self.polarization_label()}-polarized")
-        lines.append(f"• Angle of incidence: {self.angle_of_incidence}°")
-        lines.append(f"• Azimuthal angle (phi): {self.phi}°")
+        lines.append(f"• Angle of incidence (deg): {self.angle_of_incidence}°")
+        lines.append(f"• Azimuthal angle (phi) (deg): {self.phi}°")
         lines.append(f"• Incidence direction: {self.incidence}")
         lines.append(f"• Type: {self.type}")
         return "\n".join(lines)

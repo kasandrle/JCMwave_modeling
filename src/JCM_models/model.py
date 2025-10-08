@@ -123,17 +123,17 @@ class Shape:
             return ax
         
     def to_dict(self):
-        """🔹 Export shape metadata and geometry as a dictionary."""
         return {
             'name': self.name,
             'domain_id': self.domain_id,
             'priority': self.priority,
             'side_length_constraint': self.side_length_constraint,
             'points': self.points,
-            'nk': str(self.nk),  # convert complex to string for JSON
+            'nk': [str(n) for n in self.nk] if isinstance(self.nk, list) else str(self.nk),
             'boundary': self.boundary,
             'permittivity': str(self.permittivity)
         }
+
 
     def save(self, filename=None):
         """🔹 Save shape to a JSON file."""
@@ -145,16 +145,25 @@ class Shape:
 
     @classmethod
     def from_dict(cls, data):
-        """🔹 Reconstruct a Shape from a dictionary."""
+        nk_raw = data['nk']
+        if isinstance(nk_raw, list):
+            nk_value = [complex(n.replace(' ', '')) for n in nk_raw]
+        elif isinstance(nk_raw, str) and nk_raw.startswith('['):
+            # Handle stringified list like "[0.9+0.1j, 1.0+0.0j]"
+            nk_value = [complex(n.strip()) for n in nk_raw.strip('[]').split(',')]
+        else:
+            nk_value = complex(nk_raw.replace(' ', ''))
+
         return cls(
             name=data['name'],
             domain_id=data['domain_id'],
             priority=data['priority'],
             side_length_constraint=data['side_length_constraint'],
             points=data['points'],
-            nk=complex(data['nk']),
+            nk=nk_value,
             boundary=data.get('boundary', ['Transparent','Periodic','Transparent','Periodic'])
         )
+
 
     @classmethod
     def load(cls, filename):

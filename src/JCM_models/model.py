@@ -2,6 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.patches import Polygon
 import pandas as pd
+import json
 from typing import Any, Dict, List, Optional
 from .utils import eVnm_converter
 
@@ -120,6 +121,51 @@ class Shape:
         else:
             ax.add_patch(polygon)
             return ax
+        
+    def to_dict(self):
+        """🔹 Export shape metadata and geometry as a dictionary."""
+        return {
+            'name': self.name,
+            'domain_id': self.domain_id,
+            'priority': self.priority,
+            'side_length_constraint': self.side_length_constraint,
+            'points': self.points,
+            'nk': str(self.nk),  # convert complex to string for JSON
+            'boundary': self.boundary,
+            'permittivity': str(self.permittivity)
+        }
+
+    def save(self, filename=None):
+        """🔹 Save shape to a JSON file."""
+        if filename is None:
+            filename = f"{self.name}_shape.json"
+        with open(filename, 'w') as f:
+            json.dump(self.to_dict(), f, indent=2)
+        print(f"🔸 Shape '{self.name}' saved to {filename}")
+
+    @classmethod
+    def from_dict(cls, data):
+        """🔹 Reconstruct a Shape from a dictionary."""
+        return cls(
+            name=data['name'],
+            domain_id=data['domain_id'],
+            priority=data['priority'],
+            side_length_constraint=data['side_length_constraint'],
+            points=data['points'],
+            nk=complex(data['nk']),
+            boundary=data.get('boundary', ['Transparent','Periodic','Transparent','Periodic'])
+        )
+
+    @classmethod
+    def load(cls, filename):
+        """🔹 Load a Shape from a JSON file."""
+        with open(filename, 'r') as f:
+            data = json.load(f)
+        shape = cls.from_dict(data)
+        print(f"🔸 Shape '{shape.name}' loaded from {filename}")
+        return shape
+
+
         
 class Source:
     """

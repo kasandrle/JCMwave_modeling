@@ -1,0 +1,24 @@
+{
+  "name": "ComputationalDomain",
+  "domain_id": 1,
+  "priority": -1,
+  "side_length_constraint": 1,
+  "points": [
+    -25.0,
+    -15,
+    25.0,
+    -15,
+    25.0,
+    45,
+    -25.0,
+    45
+  ],
+  "nk": "1",
+  "boundary": [
+    "Transparent",
+    "Periodic",
+    "Transparent",
+    "Periodic"
+  ],
+  "permittivity": "1"
+}

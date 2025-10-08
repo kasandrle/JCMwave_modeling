@@ -73,7 +73,7 @@ class ShapeGenerator:
         coords = self.generate()
         x_vals = [pt[0] for pt in coords]
         x_center = (max(x_vals) + min(x_vals)) / 2
-        return [(x - x_center+self.offset_x, y+self.offset_y) for (x, y) in coords]
+        return [(x - x_center+self.offset_x, y) for (x, y) in coords]
     
     def _apply_corner_radii(self, coords, corner_radii, n=50):
         """Applies per-corner rounding based on corner_radii dict."""

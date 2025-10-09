@@ -553,10 +553,13 @@ class FourierCoefficients:
         df["k_norm"] = df.apply(lambda row: np.linalg.norm([row["Kx_in"], row["Ky_in"], row["Kz_in"]]), axis=1)
         df["cos_theta_in"] = df["Kz_in"] / df["k_norm"]
         df["cos_theta_out"] = df["Kz"] / df["k_norm"]
-        df["cos_phi_out"] = np.sqrt(1 - np.square(np.abs(df["Kx"] - df["Kx_in"]) / df["k_norm"]))
-        df["Intensity_calc_corrected"] = (
-            df["Intensity_calc"] * df["cos_theta_out"] / df["cos_theta_in"] * df["cos_phi_out"]
-        )
+        with np.errstate(invalid='ignore', divide='ignore'):
+            df["cos_phi_out"] = np.sqrt(1 - np.square(np.abs(df["Kx"] - df["Kx_in"]) / df["k_norm"]))
+
+            df["Intensity_calc_corrected"] = (
+                df["Intensity_calc"] * df["cos_theta_out"] / df["cos_theta_in"] * df["cos_phi_out"]
+            )
+
         return df
 
 

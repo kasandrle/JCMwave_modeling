@@ -55,8 +55,9 @@ class ShapeGenerator:
 
         # Check for embedded corner radii
         corner_radii = self.params.get('corner_radii')
+        n = self.params.get('n',50)
         if corner_radii:
-            coords = self._apply_corner_radii(coords, corner_radii)
+            coords = self._apply_corner_radii(coords, corner_radii,n=n)
 
         return coords
 

@@ -474,6 +474,7 @@ class FourierCoefficients:
         )
 
     def compute_order_intensities(self, orders_uni=(-1, 0, 1)):
+        """maybe don't us this"""
         orders_uni = np.array(orders_uni)
 
         orders = self.data["N1"]
@@ -513,32 +514,21 @@ class FourierCoefficients:
         }
     
     def to_dataframe(self):
-        """
-        Build a DataFrame with diffraction order information:
-        Kx, Ky, Kz, input wavevector, raw and corrected intensities.
-        """
         K = self.data["K"]
-        N1 = self.data["N1"]
         E = self.data["ElectricFieldStrength"][0]
 
-        # Components
         Kx, Ky, Kz = K[:, 0], K[:, 1], K[:, 2]
-
-        # Input k-vector
         k_in = self.header["IncomingPlaneWaveKVector"][0]
         Kx_in, Ky_in, Kz_in = k_in[0], k_in[1], k_in[2]
 
-        # Intensities from all components
         amp_x, amp_y, amp_z = E[:, 0], E[:, 1], E[:, 2]
         intensity = (amp_x.conj() * amp_x).real + \
                     (amp_y.conj() * amp_y).real + \
                     (amp_z.conj() * amp_z).real
 
-        # Build dataframe
-        n_orders = len(N1)
+        n_orders = len(K)
 
         df = pd.DataFrame({
-            "order": N1,
             "Kx": Kx,
             "Ky": Ky,
             "Kz": Kz,
@@ -548,14 +538,15 @@ class FourierCoefficients:
             "Intensity_calc": intensity
         })
 
+        if "N1" in self.data and self.data["N1"] is not None:
+            df["order"] = self.data["N1"]
 
-        # Derived quantities
         df["k_norm"] = df.apply(lambda row: np.linalg.norm([row["Kx_in"], row["Ky_in"], row["Kz_in"]]), axis=1)
         df["cos_theta_in"] = df["Kz_in"] / df["k_norm"]
         df["cos_theta_out"] = df["Kz"] / df["k_norm"]
+
         with np.errstate(invalid='ignore', divide='ignore'):
             df["cos_phi_out"] = np.sqrt(1 - np.square(np.abs(df["Kx"] - df["Kx_in"]) / df["k_norm"]))
-
             df["Intensity_calc_corrected"] = (
                 df["Intensity_calc"] * df["cos_theta_out"] / df["cos_theta_in"] * df["cos_phi_out"]
             )
@@ -644,10 +635,10 @@ class SimulationResult:
                     title=block["title"],
                     header=block["header"],
                     K=block["K"],
-                    N1=block["N1"],
-                    N2=block["N2"],
-                    ElectricFieldStrength=block["ElectricFieldStrength"]
+                    ElectricFieldStrength=block["ElectricFieldStrength"],
+                    **{k: block[k] for k in ("N1", "N2") if k in block}
                 ))
+
 
         return cls(
             file=raw[0].get("file", "unknown"),

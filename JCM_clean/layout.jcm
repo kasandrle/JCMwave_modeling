@@ -44,14 +44,6 @@ UnitOfLength = 1e-09
                 SideLengthConstraint = 1
             }
         
-        Polygon {
-                Name = "shape_bg"
-                DomainId = 3
-                Priority = 1
-                Points = [-12 0 12 0 12 28.0890058133419 -12 28.0890058133419]
-                SideLengthConstraint = 1
-            }
-        
 }
 
 
